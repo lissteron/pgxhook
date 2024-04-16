@@ -6,6 +6,8 @@ services:
       dockerfile: build.Dockerfile
     tty: true
     working_dir: /src
+    environment:
+      - CGO_ENABLED=1
     depends_on:
       postgres:
         condition: service_healthy

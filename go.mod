@@ -6,6 +6,7 @@ require (
 	github.com/georgysavva/scany/v2 v2.1.3
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/stretchr/testify v1.8.4
+	go.uber.org/goleak v1.3.0
 )
 
 require (

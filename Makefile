@@ -1,6 +1,6 @@
 USER_ID := $(shell id -u):$(shell id -g)
 DOCKER_COMPOSE_RUN ?= docker-compose
-TEST_CMD ?= go clean -testcache && go test -v -tags=integration ./...
+TEST_CMD ?= go clean -testcache && go test -race -v -tags=integration ./...
 
 .PHONY: lint
 lint: ## Run linter
