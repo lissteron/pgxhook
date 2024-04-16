@@ -26,10 +26,10 @@ clean: ## Remove all generated code
 	rm -rf gen/
 	rm -rf .cover/
 
-.PHONY: regen
-regen: clean gen ## Regenerate all
-
 .PHONY: gen
 gen: ## Generate mocks
 	mkdir -p ./gen/mocks
 	${DOCKER_COMPOSE_RUN} run --rm mockery /bin/sh -c "mockery && chown -R $(USER_ID) gen/"
+
+.PHONY: regen
+regen: clean gen ## Regenerate all

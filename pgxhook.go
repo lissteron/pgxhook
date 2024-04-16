@@ -5,16 +5,15 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type HookConn struct {
-	conn        *pgxpool.Pool
+	conn        InputConn
 	beforeHooks []BeforeHook
 	afterHooks  []AfterHook
 }
 
-func NewHookConn(conn *pgxpool.Pool, opts ...HookConnOption) *HookConn {
+func NewHookConn(conn InputConn, opts ...HookConnOption) *HookConn {
 	c := &HookConn{conn: conn}
 
 	for _, opt := range opts {
@@ -231,19 +230,22 @@ func (c *HookConn) Ping(ctx context.Context) error {
 	return nil
 }
 
-func (c *HookConn) Close() {
-	c.conn.Close()
+func (c *HookConn) Close(ctx context.Context) error {
+	conn, ok := c.conn.(ConnCloser)
+	if ok {
+		return conn.Close(ctx)
+	}
+
+	pool, ok := c.conn.(PoolCloser)
+	if ok {
+		pool.Close()
+
+		return nil
+	}
+
+	return nil
 }
 
-func (c *HookConn) Config() *pgxpool.Config {
-	return c.conn.Config()
-}
-
-func (c *HookConn) CopyFrom(
-	ctx context.Context,
-	tableName pgx.Identifier,
-	columnNames []string,
-	rowSrc pgx.CopyFromSource,
-) (int64, error) {
-	return c.conn.CopyFrom(ctx, tableName, columnNames, rowSrc)
+func (c *HookConn) Conn() InputConn {
+	return c.conn
 }

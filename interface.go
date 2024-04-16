@@ -5,7 +5,6 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Tx = pgx.Tx
@@ -20,10 +19,9 @@ type Conn interface {
 	SendBatch(ctx context.Context, b *pgx.Batch) (br pgx.BatchResults)
 
 	Ping(ctx context.Context) error
-	Close()
+	Close(ctx context.Context) error
 
-	Config() *pgxpool.Config
-	CopyFrom(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error)
+	Conn() InputConn
 }
 
 type BeforeHook interface {
@@ -37,4 +35,23 @@ type AfterHook interface {
 type FullHook interface {
 	BeforeHook
 	AfterHook
+}
+
+type InputConn interface {
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+	SendBatch(ctx context.Context, b *pgx.Batch) (br pgx.BatchResults)
+
+	Begin(ctx context.Context) (Tx, error)
+	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (Tx, error)
+	Ping(ctx context.Context) error
+}
+
+type ConnCloser interface {
+	Close(ctx context.Context) error
+}
+
+type PoolCloser interface {
+	Close()
 }
