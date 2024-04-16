@@ -1,13 +1,20 @@
 USER_ID := $(shell id -u):$(shell id -g)
 DOCKER_COMPOSE_RUN ?= docker-compose
-TEST_CMD ?= go clean -testcache && go test -race -v -tags=integration ./...
+
+TEST_CMD ?= go test -race -v -tags=integration ./...
+WITH_COVER ?= -coverprofile=.cover/cover.out && go tool cover -html=.cover/cover.out -o .cover/cover.html
+
+default: lint test
+
+.cover/:
+	mkdir $@
 
 .PHONY: lint
 lint: ## Run linter
 	${DOCKER_COMPOSE_RUN} run --rm linter /bin/sh -c "golangci-lint run ./... -c .golangci.yml -v"
 
-test: ## Run tests
-	${DOCKER_COMPOSE_RUN} run --rm app /bin/sh -c "${TEST_CMD}"
+test: .cover/ ## Run tests
+	${DOCKER_COMPOSE_RUN} run --rm app /bin/sh -c "${TEST_CMD} ${WITH_COVER}"
 	${DOCKER_COMPOSE_RUN} down
 
 .PHONY: down
@@ -17,6 +24,7 @@ down: ## Down infra
 .PHONY: clean
 clean: ## Remove all generated code
 	rm -rf gen/
+	rm -rf .cover/
 
 .PHONY: regen
 regen: clean gen ## Regenerate all
