@@ -240,9 +240,6 @@ func (t *HookTx) Prepare(ctx context.Context, name, sql string) (*pgconn.Stateme
 	return t.tx.Prepare(ctx, name, sql)
 }
 
-// TODO remove
 func (t *HookTx) Conn() *pgx.Conn {
-	c, _ := t.conn.conn.Acquire(context.Background())
-
-	return c.Conn()
+	return t.tx.Conn()
 }

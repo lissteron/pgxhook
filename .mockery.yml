@@ -1,0 +1,8 @@
+with-expecter: true
+log-level: warn 
+packages:
+  github.com/lissteron/pgxhook:
+    config:
+      all: True 
+      dir: ./gen/mocks/
+      outpkg: "mocks"
